@@ -34,25 +34,25 @@ const userTypes = [
 
 const comingSoonTools = [
   {
-    name: "Causal-style Modeling",
+    name: "Advanced Modeling",
     description: "Build financial models with scenario planning",
     icon: TrendingUp,
     color: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   },
   {
-    name: "Pulley Equity Planning",
+    name: "Cap Table & Equity Planning",
     description: "Cap table and equity management tools",
     icon: Users,
     color: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   },
   {
-    name: "Runway Dashboard",
+    name: "Advanced Dashboard",
     description: "Advanced burn rate analytics and forecasting",
     icon: BarChart3,
     color: "bg-green-500/10 text-green-400 border-green-500/20",
   },
   {
-    name: "Mercury Raise Tracker",
+    name: "Fundraising Tracker",
     description: "Fundraising pipeline and investor management",
     icon: Building2,
     color: "bg-orange-500/10 text-orange-400 border-orange-500/20",
@@ -152,7 +152,15 @@ export default function CFOGPSLanding() {
     const income = Number.parseFloat(monthlyIncome) || 0
     const growthRate = growthType === "percentage" ? Number.parseFloat(revenueGrowthRate) || 0 : 0
     const fixedGrowth = growthType === "fixed" ? Number.parseFloat(fixedGrowthAmount) || 0 : 0
-    const maxMonths = Number.parseInt(monthsToShow) || 24
+    // Calculate max months to show - always show at least 1 month more than out of cash or 6 months more than profitable
+    let maxMonths = Number.parseInt(monthsToShow) || 24
+    const initialNetBurn = burn - income
+    if (initialNetBurn > 0) {
+      const monthsToZero = Math.ceil(cash / initialNetBurn)
+      maxMonths = Math.max(maxMonths, monthsToZero + 1)
+    } else {
+      maxMonths = Math.max(maxMonths, 6) // Show at least 6 months if profitable
+    }
 
     let currentCash = cash
     let currentIncome = income
@@ -421,11 +429,10 @@ export default function CFOGPSLanding() {
             </p>
             <div className="space-y-2">
               <p className="text-base text-gray-500 max-w-4xl mx-auto leading-relaxed">
-                Whether you're broke, bootstrapped, or building a billion-dollar company — this is your path to
-                financial clarity.
+                placeholder="Whether you're broke, bootstrapped, or building a billion-dollar company — this is your path to financial clarity"
               </p>
               <p className="text-base text-gray-500 max-w-4xl mx-auto leading-relaxed">
-                Make smarter financial decisions at every turn.
+                placeholder="Make smarter financial decisions at every turn"
               </p>
             </div>
           </div>
@@ -1260,7 +1267,7 @@ export default function CFOGPSLanding() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">Months to Show</label>
+                        <label className="text-sm font-medium text-gray-300">Max months to show</label>
                         <Input
                           type="number"
                           placeholder="24"
@@ -1528,13 +1535,10 @@ export default function CFOGPSLanding() {
       <div className="container mx-auto px-4 pb-8">
         <div className="text-center space-y-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            CFO GPS Tools For Any Financial Situation - Coming Soon
+            CFO GPS Tools For Any Financial Situation
           </h2>
           <p className="text-gray-500 text-sm max-w-4xl mx-auto leading-relaxed">
-            A CFO, or Chief Financial Officer, is a top-level executive in a company who oversees all financial
-            activities and ensures the company's financial health. They are responsible for financial planning, risk
-            management, and financial reporting, as well as analyzing the company's financial performance and making
-            strategic decisions.
+            A CFO, or Chief Financial Officer, is the person responsible for managing the finances of a company — forecasting runway, planning budgets, weighing risks, and deciding how to allocate limited resources. But here's the truth: every one of us is a CFO, whether we're living paycheck to paycheck, running a startup, retired on fixed income, or leading a global company. CFO GPS gives you the tools to make smart, strategic financial decisions — no matter where you are in life. Because whether you're managing $20 or $20 million, your job is the same: make it last, make it work, and make it grow. Be default alive. NOT default dead.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {userTypes.map((type) => (
@@ -1560,7 +1564,7 @@ export default function CFOGPSLanding() {
       <div className="container mx-auto px-4 pb-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">Tools Coming Soon</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">CFO GPS Advanced Tool Road Map</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
               Building the complete financial toolkit for startups and individuals
             </p>
@@ -1621,7 +1625,8 @@ export default function CFOGPSLanding() {
       <footer className="border-t border-gray-800 bg-gray-900/50">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <p className="text-gray-500 text-sm">Built for founders, by founders. From paycheck to IPO.</p>
+            <p className="text-gray-500 text-sm">From broke to paycheck to paycheck to IPO.</p>
+            <p className="text-gray-500 text-sm mt-2">Copyright © 2025 CFO GPS</p>
           </div>
         </div>
       </footer>
