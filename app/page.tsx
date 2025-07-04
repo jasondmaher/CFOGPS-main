@@ -322,13 +322,16 @@ export default function CFOGPSLanding() {
     const spendingAmounts = [5, 10, 20, 50, 100]
 
     // Calculate additional savings metrics
-    const cheaperNetFuel = trueCostPerGallon1 < trueCostPerGallon2 ? netFuelAdded1 : netFuelAdded2
-    const expensiveNetFuel = trueCostPerGallon1 < trueCostPerGallon2 ? netFuelAdded2 : netFuelAdded1
-    const netFuelSavings = cheaperNetFuel - expensiveNetFuel
+    const isStation1Cheaper = trueCostPerGallon1 < trueCostPerGallon2
+    const cheaperNetFuel = isStation1Cheaper ? netFuelAdded1 : netFuelAdded2
+    const expensiveNetFuel = isStation1Cheaper ? netFuelAdded2 : netFuelAdded1
+    // Ensure netFuelSavings is always positive
+    const netFuelSavings = Math.abs(cheaperNetFuel - expensiveNetFuel)
 
-    const cheaperNetGallons = trueCostPerGallon1 < trueCostPerGallon2 ? netGallons1 : netGallons2
-    const expensiveNetGallons = trueCostPerGallon1 < trueCostPerGallon2 ? netGallons2 : netGallons1
-    const gallonsSavings = cheaperNetGallons - expensiveNetGallons
+    const cheaperNetGallons = isStation1Cheaper ? netGallons1 : netGallons2
+    const expensiveNetGallons = isStation1Cheaper ? netGallons2 : netGallons1
+    // Ensure gallonsSavings is always positive
+    const gallonsSavings = Math.abs(cheaperNetGallons - expensiveNetGallons)
 
     // CO2 emissions: approximately 19.6 lbs CO2 per gallon of gasoline
     const co2Savings = gallonsSavings * 19.6
@@ -343,8 +346,17 @@ export default function CFOGPSLanding() {
       const trueCost2 = netGal2 > 0 ? amount / netGal2 : 0
 
       // Calculate net fuel added for each station at this spending amount
-      const netFuelAdded1ForAmount = amount - drivingCost1
-      const netFuelAdded2ForAmount = amount - drivingCost2
+      const netFuelAdded1ForAmount = Math.max(0, amount - drivingCost1)
+      const netFuelAdded2ForAmount = Math.max(0, amount - drivingCost2)
+      // Calculate which station is cheaper for this amount
+      const gallonsPurch1 = amount / price1
+      const gallonsPurch2 = amount / price2
+      const netGal1 = gallonsPurch1 - gallonsUsedDriving1
+      const netGal2 = gallonsPurch2 - gallonsUsedDriving2
+      const isStation1Cheaper = (netGal1 > 0 && netGal2 > 0) ? 
+        (amount / netGal1) < (amount / netGal2) : 
+        (netGal1 > netGal2)
+      // Calculate net savings as the difference in net fuel added
       const netSavings = Math.abs(netFuelAdded1ForAmount - netFuelAdded2ForAmount)
 
       return {
@@ -368,7 +380,7 @@ export default function CFOGPSLanding() {
       const netGal2 = gallonsPurch2 - gallonsUsedDriving2
       const trueCost1 = netGal1 > 0 ? amount / netGal1 : 0
       const trueCost2 = netGal2 > 0 ? amount / netGal2 : 0
-      const savings = Math.abs(trueCost1 - trueCost2)
+      const savings = Math.max(0, Math.abs(trueCost1 - trueCost2))
 
       chartData.push({
         amount,
@@ -429,10 +441,10 @@ export default function CFOGPSLanding() {
             </p>
             <div className="space-y-2">
               <p className="text-base text-gray-500 max-w-4xl mx-auto leading-relaxed">
-                placeholder="Whether you're broke, bootstrapped, or building a billion-dollar company — this is your path to financial clarity"
+                Whether you're broke, bootstrapped, or building a billion-dollar company — this is your path to financial clarity
               </p>
               <p className="text-base text-gray-500 max-w-4xl mx-auto leading-relaxed">
-                placeholder="Make smarter financial decisions at every turn"
+                Make smarter financial decisions at every turn
               </p>
             </div>
           </div>
@@ -1209,20 +1221,30 @@ export default function CFOGPSLanding() {
                         people. But it's the most important question for any company.
                       </p>
                     </div>
-
-                    {/* Video Button */}
-                    <div className="pt-4">
-                      <Button
-                        onClick={() => setShowVideoModal(true)}
-                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white"
-                      >
-                        <Play className="h-4 w-4" />
-                        YC: Save Your Startup Video
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               )}
+
+              {/* YC Video Card */}
+              <Card className="bg-gray-900 border-gray-800">
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-red-600/20 border border-red-500/50 flex-shrink-0 flex items-center justify-center">
+                      <Play className="h-6 w-6 text-red-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-white font-medium">YC: Save Your Startup</h3>
+                      <p className="text-sm text-gray-400">Watch the essential guide to startup survival</p>
+                    </div>
+                    <Button
+                      onClick={() => setShowVideoModal(true)}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      Watch Video
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card className="bg-gray-900 border-gray-800">
                 <CardHeader>
@@ -1535,7 +1557,7 @@ export default function CFOGPSLanding() {
       <div className="container mx-auto px-4 pb-8">
         <div className="text-center space-y-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            CFO GPS Tools For Any Financial Situation
+            Tools For Any Financial Situation
           </h2>
           <p className="text-gray-500 text-sm max-w-4xl mx-auto leading-relaxed">
             A CFO, or Chief Financial Officer, is the person responsible for managing the finances of a company — forecasting runway, planning budgets, weighing risks, and deciding how to allocate limited resources. But here's the truth: every one of us is a CFO, whether we're living paycheck to paycheck, running a startup, retired on fixed income, or leading a global company. CFO GPS gives you the tools to make smart, strategic financial decisions — no matter where you are in life. Because whether you're managing $20 or $20 million, your job is the same: make it last, make it work, and make it grow. Be default alive. NOT default dead.
@@ -1564,7 +1586,7 @@ export default function CFOGPSLanding() {
       <div className="container mx-auto px-4 pb-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">CFO GPS Advanced Tool Road Map</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Advanced Tool Road Map</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
               Building the complete financial toolkit for startups and individuals
             </p>
@@ -1625,7 +1647,7 @@ export default function CFOGPSLanding() {
       <footer className="border-t border-gray-800 bg-gray-900/50">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <p className="text-gray-500 text-sm">From broke to paycheck to paycheck to IPO.</p>
+            <p className="text-gray-500 text-sm">From broke to paycheck to paycheck to IPO</p>
             <p className="text-gray-500 text-sm mt-2">Copyright © 2025 CFO GPS</p>
           </div>
         </div>
